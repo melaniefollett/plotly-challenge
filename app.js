@@ -83,3 +83,56 @@ function buildPlots(patientId) {
     });
 };
 
+// Create function to get and display metadata for each patient
+function getMetadata(patientId) {
+    d3.json("samples.json").then((patientData)=> {
+        
+        // Get all metadata info
+        let metadata = patientData.metadata;
+        console.log("All Metadata:", metadata);
+
+        // Filter metadata info by id
+        let patientMetadata = metadata.filter((info) => info.id === parseInt(patientId));
+        console.log("Patient Metadata:", patientMetadata);
+
+        // Select demographic info panel
+        let demographicInfo = d3.select("#sample-metadata");
+        
+        // Empty the demographic info panel each time before getting new id info
+        demographicInfo.html("");
+
+        // Grab the metadata for specified patient and append the info to the panel
+        Object.entries(patientMetadata[0]).forEach((key) => {   
+                demographicInfo.append("h5").text(key[0] + ": " + key[1]);    
+        });
+    });
+}
+
+// Create function for selecting different patients
+function optionChanged(patientId) {
+    console.log("Patient Id:", patientId);
+    buildPlots(patientId);
+    getMetadata(patientId);
+};
+
+// Create the function for the initial data rendering
+function init() {
+    // Select the dropdown menu 
+    let dropdown = d3.select("#selDataset");
+ 
+    d3.json("samples.json").then((patientData)=> {
+        console.log("Patients Data:", patientData);
+
+        // Append the id data to the dropdown menu
+        patientData.names.forEach(function(name) {
+            dropdown.append("option").text(name).property("value");
+        });
+
+        //Call the plot and data functions to display the data and the plots to the page
+        buildPlots(patientData.names[0]);
+        getMetadata(patientData.names[0]);
+    });
+};
+
+init();
+
